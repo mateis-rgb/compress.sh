@@ -4,10 +4,39 @@
 INSTALL_DIR="$HOME/.bin/compress"
 mkdir -p "$INSTALL_DIR"
 
-# Vérifier si le script compress.sh existe
+# URLs des fichiers à télécharger
+COMPRESS_URL="https://raw.githubusercontent.com/mateis-rgb/compress.sh/refs/heads/main/compress.sh"
+INSTALL_URL="https://raw.githubusercontent.com/mateis-rgb/compress.sh/refs/heads/main/install.sh"
+UNINSTALL_URL="https://raw.githubusercontent.com/mateis-rgb/compress.sh/refs/heads/main/uninstall.sh"
+
+# Vérifier si le script compress.sh existe, sinon le télécharger
 if [ ! -f "compress.sh" ]; then
-    echo -e "\e[31m[ERROR]: \e[37mLe fichier compress.sh n'existe pas dans le répertoire courant."
-    exit 1
+    echo -e "\e[33m[WARNING]: \e[37mLe fichier compress.sh n'existe pas dans le répertoire courant. Téléchargement depuis GitHub..."
+    curl -o compress.sh "$COMPRESS_URL"
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31m[ERROR]: \e[37mÉchec du téléchargement de compress.sh."
+        exit 1
+    fi
+fi
+
+# Vérifier si le script install.sh existe, sinon le télécharger
+if [ ! -f "install.sh" ]; then
+    echo -e "\e[33m[WARNING]: \e[37mLe fichier install.sh n'existe pas dans le répertoire courant. Téléchargement depuis GitHub..."
+    curl -o install.sh "$INSTALL_URL"
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31m[ERROR]: \e[37mÉchec du téléchargement de install.sh."
+        exit 1
+    fi
+fi
+
+# Vérifier si le script uninstall.sh existe, sinon le télécharger
+if [ ! -f "uninstall.sh" ]; then
+    echo -e "\e[33m[WARNING]: \e[37mLe fichier uninstall.sh n'existe pas dans le répertoire courant. Téléchargement depuis GitHub..."
+    curl -o uninstall.sh "$UNINSTALL_URL"
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31m[ERROR]: \e[37mÉchec du téléchargement de uninstall.sh."
+        exit 1
+    fi
 fi
 
 # Déplacer les fichiers dans le répertoire d'installation
@@ -15,6 +44,13 @@ mv compress.sh install.sh uninstall.sh "$INSTALL_DIR"
 
 # Rendre les fichiers exécutables
 chmod +x "$INSTALL_DIR/compress.sh" "$INSTALL_DIR/install.sh" "$INSTALL_DIR/uninstall.sh"
+
+# Supprimer le répertoire courant s'il est vide après le déplacement des fichiers
+CURRENT_DIR=$(pwd)
+if [ -z "$(ls -A "$CURRENT_DIR")" ]; then
+    echo -e "\e[34m[PROGRAM]: \e[37mLe répertoire $CURRENT_DIR est vide. Suppression..."
+    rmdir "$CURRENT_DIR"
+fi
 
 # Déterminer quel shell est utilisé
 if [ "$SHELL" == "/bin/bash" ]; then
